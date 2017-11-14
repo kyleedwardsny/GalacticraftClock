@@ -1,0 +1,9 @@
+.*
+!.gitignore
+/build/
+/classes/
+/run/
+*.iml
+/gradlew
+/gradlew.bat
+/gradle/

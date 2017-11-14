@@ -1,0 +1,11 @@
+[{
+    "modid": "galacticraftclock",
+    "name": "Galacticraft Clock",
+    "description": "Adds interdimensional clock functionality to the Display Screen.",
+    "version": "1.0",
+    "mcversion": "1.11.2",
+    "updateJSON": "minecraftforge.net/versions.json",
+    "authorList": ["Kyle Edwards"],
+    "requiredMods": ["galacticraftcore"],
+    "dependencies": ["galacticraftcore"]
+}]
