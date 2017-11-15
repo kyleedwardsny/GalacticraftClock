@@ -7,6 +7,8 @@ import micdoodle8.mods.galacticraft.api.galaxies.GalaxyRegistry;
 import micdoodle8.mods.galacticraft.core.client.screen.DrawGameScreen;
 import micdoodle8.mods.galacticraft.core.tile.TileEntityDish;
 import micdoodle8.mods.galacticraft.core.util.GCCoreUtil;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.texture.TextureManager;
@@ -16,12 +18,14 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.client.FMLClientHandler;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import scala.tools.nsc.doc.model.Def;
 import us.kyleedwards.mods.galacticraftclock.Constants;
 import us.kyleedwards.mods.galacticraftclock.time.DimensionTimeInfo;
 import us.kyleedwards.mods.galacticraftclock.time.DimensionTimeRegistry;
 
+import java.nio.DoubleBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -58,6 +62,20 @@ public class GameScreenClock implements IGameScreen
 
         drawBlackBackground(frameBx, frameBy, 0.1f);
 
+        DoubleBuffer planes = BufferUtils.createDoubleBuffer(4 * Double.SIZE);
+        planeEquation(planes, frameA, frameA, 0, frameA, frameBy, 0, frameA, frameBy, 1);
+        GL11.glClipPlane(GL11.GL_CLIP_PLANE0, planes);
+        GL11.glEnable(GL11.GL_CLIP_PLANE0);
+        planeEquation(planes, frameBx, frameBy, 0, frameBx, frameA, 0, frameBx, frameA, 1);
+        GL11.glClipPlane(GL11.GL_CLIP_PLANE1, planes);
+        GL11.glEnable(GL11.GL_CLIP_PLANE1);
+        planeEquation(planes, frameA, frameBy, 0, frameBx, frameBy, 0, frameBx, frameBy, 1);
+        GL11.glClipPlane(GL11.GL_CLIP_PLANE2, planes);
+        GL11.glEnable(GL11.GL_CLIP_PLANE2);
+        planeEquation(planes, frameBx, frameA, 0, frameA, frameA, 0, frameA, frameA, 1);
+        GL11.glClipPlane(GL11.GL_CLIP_PLANE3, planes);
+        GL11.glEnable(GL11.GL_CLIP_PLANE3);
+
         Tessellator tess = Tessellator.getInstance();
         VertexBuffer worldRenderer = tess.getBuffer();
 
@@ -92,11 +110,11 @@ public class GameScreenClock implements IGameScreen
                 DimensionTimeInfo info = DimensionTimeRegistry.dimensionTimes.get(dimensionId);
                 float dayProgress = ((float) info.time % (float) info.dayLength) / (float) info.dayLength;
 
-                float barLeft = frameA + (displayWidth - squareSize) / 2 + 0.1f;
-                float barRight = frameBx - (displayWidth - squareSize) / 2 - 0.1f;
+                float barLeft = frameA + (displayWidth - squareSize) / 2 + 0.05f * squareSize;
+                float barRight = frameBx - (displayWidth - squareSize) / 2 - 0.05f * squareSize;
                 float barWidth = barRight - barLeft;
                 float barHeight = barWidth * 5f / 40f;
-                float barBottom = frameBy - (displayHeight - squareSize) / 2 - 0.1f;
+                float barBottom = frameBy - (displayHeight - squareSize) / 2 - 0.05f * squareSize;
                 float barTop = barBottom - barHeight;
 
                 // Render the day/night bar
@@ -130,8 +148,24 @@ public class GameScreenClock implements IGameScreen
                 GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
                 GL11.glEnable(GL11.GL_TEXTURE_2D);
 
-                float bodyBottom = markerTop - barHeight / 5F;
-                float bodyTop = frameA + (displayHeight - squareSize) / 2 + 0.1F;
+                FontRenderer renderer = Minecraft.getMinecraft().fontRendererObj;
+                float scaleText = squareSize / (float) renderer.FONT_HEIGHT * 0.15F;
+                String name = body.getLocalizedName();
+                int strWidth = renderer.getStringWidth(name);
+                float strLeft = scaleX / 2 - (float) strWidth * scaleText / 2;
+                float strBottom = markerTop - squareSize * (0.15F / (float) renderer.FONT_HEIGHT);
+                float strTop = strBottom - squareSize * 0.15F;
+
+                // Render the text
+                GL11.glPushMatrix();
+                GL11.glTranslatef(strLeft, strTop, 0.0F);
+                GL11.glScalef(scaleText, scaleText, 1.0F);
+                renderer.drawString(name, 0, 0, 0xE6E6E6, false);
+                GL11.glPopMatrix();
+                GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+
+                float bodyBottom = strTop - squareSize * (0.15F / (float) renderer.FONT_HEIGHT);
+                float bodyTop = frameA + (displayHeight - squareSize) / 2 + 0.05F * squareSize;
                 float bodyHeight = bodyBottom - bodyTop;
                 float bodyWidth = bodyHeight;
                 float bodyLeft = scaleX / 2 - bodyWidth / 2;
@@ -151,11 +185,15 @@ public class GameScreenClock implements IGameScreen
         {
             // TODO Show communications error
         }
+
+        GL11.glDisable(GL11.GL_CLIP_PLANE3);
+        GL11.glDisable(GL11.GL_CLIP_PLANE2);
+        GL11.glDisable(GL11.GL_CLIP_PLANE1);
+        GL11.glDisable(GL11.GL_CLIP_PLANE0);
     }
 
     private void drawBlackBackground(float frameBx, float frameBy, float grayLevel)
     {
-
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         GL11.glDisable(GL11.GL_TEXTURE_2D);
         Tessellator tess = Tessellator.getInstance();
@@ -171,5 +209,16 @@ public class GameScreenClock implements IGameScreen
 
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         GL11.glEnable(GL11.GL_TEXTURE_2D);
+    }
+
+    private static void planeEquation(DoubleBuffer planes, float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3)
+    {
+        double[] result = new double[4];
+        result[0] = y1 * (z2 - z3) + y2 * (z3 - z1) + y3 * (z1 - z2);
+        result[1] = z1 * (x2 - x3) + z2 * (x3 - x1) + z3 * (x1 - x2);
+        result[2] = x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2);
+        result[3] = -(x1 * (y2 * z3 - y3 * z2) + x2 * (y3 * z1 - y1 * z3) + x3 * (y1 * z2 - y2 * z1));
+        planes.put(result, 0, 4);
+        planes.position(0);
     }
 }
