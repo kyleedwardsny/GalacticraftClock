@@ -4,6 +4,7 @@ import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
 import us.kyleedwards.mods.galacticraftclock.GalacticraftClockMod;
+import us.kyleedwards.mods.galacticraftclock.time.DimensionTimeInfo;
 
 import java.util.Map;
 
@@ -16,7 +17,7 @@ public class ClockPacketHandler
         INSTANCE.registerMessage(WorldTimeMessage.MessageHandler.class, WorldTimeMessage.class, 0, Side.CLIENT);
     }
 
-    public static void sendWorldTimes(Map<Integer, Long> times)
+    public static void sendWorldTimes(Map<Integer, DimensionTimeInfo> times)
     {
         WorldTimeMessage message = new WorldTimeMessage(times);
         INSTANCE.sendToAll(message);

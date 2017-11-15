@@ -6,6 +6,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import us.kyleedwards.mods.galacticraftclock.network.ClockPacketHandler;
 import us.kyleedwards.mods.galacticraftclock.screen.GameScreenClock;
+import us.kyleedwards.mods.galacticraftclock.tick.TickHandlerClient;
 import us.kyleedwards.mods.galacticraftclock.tick.TickHandlerServer;
 
 @Mod(modid = GalacticraftClockMod.MODID, version = GalacticraftClockMod.VERSION)
@@ -19,6 +20,7 @@ public class GalacticraftClockMod
     {
         ClockPacketHandler.registerMessages();
         MinecraftForge.EVENT_BUS.register(TickHandlerServer.class);
+        MinecraftForge.EVENT_BUS.register(TickHandlerClient.class);
         GalacticraftRegistry.registerScreen(new GameScreenClock());
     }
 }

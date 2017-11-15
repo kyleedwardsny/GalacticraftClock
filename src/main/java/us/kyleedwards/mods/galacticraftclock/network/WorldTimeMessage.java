@@ -5,6 +5,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import us.kyleedwards.mods.galacticraftclock.time.DimensionTimeInfo;
+import us.kyleedwards.mods.galacticraftclock.time.DimensionTimeRegistry;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -12,19 +14,19 @@ import java.util.Map;
 
 public class WorldTimeMessage implements IMessage
 {
-    private HashMap<Integer, Long> times;
+    private HashMap<Integer, DimensionTimeInfo> times;
 
     public WorldTimeMessage()
     {
-        this.times = new HashMap<Integer, Long>();
+        this.times = new HashMap<Integer, DimensionTimeInfo>();
     }
 
-    public WorldTimeMessage(Map<Integer, Long> times)
+    public WorldTimeMessage(Map<Integer, DimensionTimeInfo> times)
     {
-        this.times = new HashMap<Integer, Long>(times);
+        this.times = new HashMap<Integer, DimensionTimeInfo>(times);
     }
 
-    public Map<Integer, Long> getTimes()
+    public Map<Integer, DimensionTimeInfo> getTimes()
     {
         return Collections.unmodifiableMap(this.times);
     }
@@ -32,21 +34,24 @@ public class WorldTimeMessage implements IMessage
     @Override
     public void fromBytes(ByteBuf buf)
     {
-        while (buf.readableBytes() >= 12)
+        while (buf.readableBytes() > 0)
         {
-            int cbodyId = buf.readInt();
-            long time = buf.readLong();
-            this.times.put(cbodyId, time);
+            int dimensionID = buf.readInt();
+            DimensionTimeInfo info = new DimensionTimeInfo();
+            info.time = buf.readLong();
+            info.dayLength = buf.readLong();
+            this.times.put(dimensionID, info);
         }
     }
 
     @Override
     public void toBytes(ByteBuf buf)
     {
-        for (Map.Entry<Integer, Long> entry : this.times.entrySet())
+        for (Map.Entry<Integer, DimensionTimeInfo> entry : this.times.entrySet())
         {
             buf.writeInt(entry.getKey());
-            buf.writeLong(entry.getValue());
+            buf.writeLong(entry.getValue().time);
+            buf.writeLong(entry.getValue().dayLength);
         }
     }
 
@@ -60,10 +65,7 @@ public class WorldTimeMessage implements IMessage
                 @Override
                 public void run()
                 {
-                    for (Map.Entry<Integer, Long> entry : message.getTimes().entrySet())
-                    {
-                        System.out.println(entry.getKey() + ": " + entry.getValue());
-                    }
+                    DimensionTimeRegistry.setDimensionTimes(message.getTimes());
                 }
             });
 

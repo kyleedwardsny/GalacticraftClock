@@ -2,8 +2,8 @@ package us.kyleedwards.mods.galacticraftclock.screen;
 
 import micdoodle8.mods.galacticraft.api.client.IGameScreen;
 import micdoodle8.mods.galacticraft.api.client.IScreenManager;
+import micdoodle8.mods.galacticraft.api.galaxies.CelestialBody;
 import micdoodle8.mods.galacticraft.api.galaxies.GalaxyRegistry;
-import micdoodle8.mods.galacticraft.api.galaxies.Planet;
 import micdoodle8.mods.galacticraft.core.client.screen.DrawGameScreen;
 import micdoodle8.mods.galacticraft.core.tile.TileEntityDish;
 import micdoodle8.mods.galacticraft.core.util.GCCoreUtil;
@@ -16,6 +16,11 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import org.lwjgl.opengl.GL11;
+import us.kyleedwards.mods.galacticraftclock.time.DimensionTimeInfo;
+import us.kyleedwards.mods.galacticraftclock.time.DimensionTimeRegistry;
+
+import java.util.ArrayList;
+import java.util.Collections;
 
 public class GameScreenClock implements IGameScreen
 {
@@ -67,11 +72,18 @@ public class GameScreenClock implements IGameScreen
 
         if (foundDish)
         {
-            for (Planet planet : GalaxyRegistry.getRegisteredPlanets().values())
+            if (!DimensionTimeRegistry.dimensionTimes.isEmpty())
             {
-                //System.out.println(provider.getWorldTime());
+                int currentBody = ((int) (ticks / (20 * 3))) % DimensionTimeRegistry.dimensionTimes.size();
+                ArrayList<Integer> dimensionIds = new ArrayList<Integer>(DimensionTimeRegistry.dimensionTimes.keySet());
+                Collections.sort(dimensionIds);
+                int dimensionId = dimensionIds.get(currentBody);
+
+                CelestialBody body = GalaxyRegistry.getCelestialBodyFromDimensionID(dimensionId);
+                DimensionTimeInfo info = DimensionTimeRegistry.dimensionTimes.get(dimensionId);
+                float dayProgress = ((float) info.time % (float) info.dayLength) / (float) info.dayLength;
+                System.out.println(body.getUnlocalizedName() + ": " + dayProgress);
             }
-            //System.out.println();
         }
         else
         {
