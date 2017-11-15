@@ -83,6 +83,9 @@ public class GameScreenClock implements IGameScreen
         World world = screen.driver.getWorld();
         BlockPos scrPos = screen.driver.getPos();
 
+        FontRenderer renderer = Minecraft.getMinecraft().fontRendererObj;
+        float scaleText = squareSize / (float) renderer.FONT_HEIGHT * 0.15F;
+
         boolean foundDish = false;
         for (TileEntity te : world.loadedTileEntityList)
         {
@@ -148,8 +151,6 @@ public class GameScreenClock implements IGameScreen
                 GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
                 GL11.glEnable(GL11.GL_TEXTURE_2D);
 
-                FontRenderer renderer = Minecraft.getMinecraft().fontRendererObj;
-                float scaleText = squareSize / (float) renderer.FONT_HEIGHT * 0.15F;
                 String name = body.getLocalizedName();
                 int strWidth = renderer.getStringWidth(name);
                 float strLeft = scaleX / 2 - (float) strWidth * scaleText / 2;
@@ -183,7 +184,30 @@ public class GameScreenClock implements IGameScreen
         }
         else
         {
-            // TODO Show communications error
+            int color = 0xFF0000;
+
+            String text = "Comm Error";
+            int strWidth = renderer.getStringWidth(text);
+            float strLeft = scaleX / 2 - (float) strWidth * scaleText / 2;
+            float strTop = scaleY / 2 - (renderer.FONT_HEIGHT + 1) * scaleText;
+
+            GL11.glPushMatrix();
+            GL11.glTranslatef(strLeft, strTop, 0F);
+            GL11.glScalef(scaleText, scaleText, 1F);
+            renderer.drawString(text, 0, 0, color, false);
+            GL11.glPopMatrix();
+
+            text = "No Dish";
+            strWidth = renderer.getStringWidth(text);
+            strLeft = scaleX / 2 - (float) strWidth * scaleText / 2;
+            strTop = scaleY / 2;
+
+            GL11.glPushMatrix();
+            GL11.glTranslatef(strLeft, strTop, 0F);
+            GL11.glScalef(scaleText, scaleText, 1F);
+            renderer.drawString(text, 0, 0, color, false);
+            GL11.glPopMatrix();
+            GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
         }
 
         GL11.glDisable(GL11.GL_CLIP_PLANE3);
