@@ -129,6 +129,22 @@ public class GameScreenClock implements IGameScreen
 
                 GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
                 GL11.glEnable(GL11.GL_TEXTURE_2D);
+
+                float bodyBottom = markerTop - barHeight / 5F;
+                float bodyTop = frameA + (displayHeight - squareSize) / 2 + 0.1F;
+                float bodyHeight = bodyBottom - bodyTop;
+                float bodyWidth = bodyHeight;
+                float bodyLeft = scaleX / 2 - bodyWidth / 2;
+                float bodyRight = scaleX / 2 + bodyWidth / 2;
+
+                // Render the celestial body
+                this.renderEngine.bindTexture(body.getBodyIcon());
+                worldRenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
+                worldRenderer.pos(bodyLeft, bodyBottom, 0).tex(0, 1.0f).endVertex();
+                worldRenderer.pos(bodyRight, bodyBottom, 0).tex(1.0f, 1.0f).endVertex();
+                worldRenderer.pos(bodyRight, bodyTop, 0).tex(1.0f, 0).endVertex();
+                worldRenderer.pos(bodyLeft, bodyTop, 0).tex(0, 0).endVertex();
+                tess.draw();
             }
         }
         else
