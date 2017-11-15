@@ -20,7 +20,6 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
-import scala.tools.nsc.doc.model.Def;
 import us.kyleedwards.mods.galacticraftclock.Constants;
 import us.kyleedwards.mods.galacticraftclock.time.DimensionTimeInfo;
 import us.kyleedwards.mods.galacticraftclock.time.DimensionTimeRegistry;

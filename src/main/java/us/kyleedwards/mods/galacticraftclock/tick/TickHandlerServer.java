@@ -2,8 +2,6 @@ package us.kyleedwards.mods.galacticraftclock.tick;
 
 import micdoodle8.mods.galacticraft.api.prefab.world.gen.WorldProviderSpace;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldProviderSurface;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.FMLCommonHandler;
