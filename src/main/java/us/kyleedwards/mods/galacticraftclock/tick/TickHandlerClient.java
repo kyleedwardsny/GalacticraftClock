@@ -9,6 +9,9 @@ public class TickHandlerClient
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent event)
     {
-        DimensionTimeRegistry.doTick();
+        if (event.phase == TickEvent.Phase.START)
+        {
+            DimensionTimeRegistry.doTick();
+        }
     }
 }

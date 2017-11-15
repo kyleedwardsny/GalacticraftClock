@@ -12,10 +12,13 @@ import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import org.lwjgl.opengl.GL11;
+import scala.tools.nsc.doc.model.Def;
+import us.kyleedwards.mods.galacticraftclock.Constants;
 import us.kyleedwards.mods.galacticraftclock.time.DimensionTimeInfo;
 import us.kyleedwards.mods.galacticraftclock.time.DimensionTimeRegistry;
 
@@ -49,8 +52,14 @@ public class GameScreenClock implements IGameScreen
     {
         float frameBx = scaleX - frameA;
         float frameBy = scaleY - frameA;
+        float displayWidth = scaleX - frameA * 2;
+        float displayHeight = scaleY - frameA * 2;
+        float squareSize = Math.min(displayWidth, displayHeight);
 
         drawBlackBackground(frameBx, frameBy, 0.1f);
+
+        Tessellator tess = Tessellator.getInstance();
+        VertexBuffer worldRenderer = tess.getBuffer();
 
         DrawGameScreen screen = (DrawGameScreen) scr;
         World world = screen.driver.getWorld();
@@ -82,7 +91,44 @@ public class GameScreenClock implements IGameScreen
                 CelestialBody body = GalaxyRegistry.getCelestialBodyFromDimensionID(dimensionId);
                 DimensionTimeInfo info = DimensionTimeRegistry.dimensionTimes.get(dimensionId);
                 float dayProgress = ((float) info.time % (float) info.dayLength) / (float) info.dayLength;
-                System.out.println(body.getUnlocalizedName() + ": " + dayProgress);
+
+                float barLeft = frameA + (displayWidth - squareSize) / 2 + 0.1f;
+                float barRight = frameBx - (displayWidth - squareSize) / 2 - 0.1f;
+                float barWidth = barRight - barLeft;
+                float barHeight = barWidth * 5f / 40f;
+                float barBottom = frameBy - (displayHeight - squareSize) / 2 - 0.1f;
+                float barTop = barBottom - barHeight;
+
+                // Render the day/night bar
+                ResourceLocation location = new ResourceLocation(Constants.ASSET_PREFIX, Constants.DAY_NIGHT_CYCLE_PNG_LOCATION);
+                this.renderEngine.bindTexture(location);
+                worldRenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
+                worldRenderer.pos(barLeft, barBottom, 0).tex(0, 1.0f).endVertex();
+                worldRenderer.pos(barRight, barBottom, 0).tex(1.0f, 1.0f).endVertex();
+                worldRenderer.pos(barRight, barTop, 0).tex(1.0f, 0).endVertex();
+                worldRenderer.pos(barLeft, barTop, 0).tex(0, 0).endVertex();
+                tess.draw();
+
+                float markerWidth = barWidth / 40f;
+                float markerHeight = barHeight * 7f / 5f;
+                float markerLeft = barLeft + barWidth * dayProgress - markerWidth / 2;
+                float markerRight = markerLeft + markerWidth;
+                float markerBottom = barBottom + barHeight / 5f;
+                float markerTop = markerBottom - markerHeight;
+
+                // Render the marker
+                GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+                GL11.glDisable(GL11.GL_TEXTURE_2D);
+                GL11.glColor4f(0.9f, 0.9f, 0.9f, 1.0f);
+                worldRenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION);
+                worldRenderer.pos(markerLeft, markerBottom, -0.005f).endVertex();
+                worldRenderer.pos(markerRight, markerBottom, -0.005f).endVertex();
+                worldRenderer.pos(markerRight, markerTop, -0.005f).endVertex();
+                worldRenderer.pos(markerLeft, markerTop, -0.005f).endVertex();
+                tess.draw();
+
+                GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+                GL11.glEnable(GL11.GL_TEXTURE_2D);
             }
         }
         else
