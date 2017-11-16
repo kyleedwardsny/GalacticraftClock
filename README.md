@@ -3,7 +3,7 @@
 Galacticraft Clock is an addon for Galacticraft that allows you to view the
 time on other celestial bodies. It was created in response to the changes to
 the time sync behavior that were made due to
-[https://github.com/micdoodle8/Galacticraft/issues/2643](#2643).
+[#2643](https://github.com/micdoodle8/Galacticraft/issues/2643).
 
 ## How to Use
 
